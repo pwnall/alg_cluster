@@ -35,3 +35,4 @@
   roles:
   - docker_registry_client
   - docker_flannel
+  - k8s_worker

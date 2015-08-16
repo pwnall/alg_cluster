@@ -2,6 +2,21 @@
 # Kubernetes worker.
 # Heavily inspired from: http://www.projectatomic.io/docs/gettingstarted/
 
+- name: write kubernetes config
+  become: true
+  become_user: root
+  template: src=k8s_config.j2 dest=/etc/kubernetes/config
+  notify:
+  - restart kubelet
+  - restart kube-proxy
+
+- name: write kubelet config
+  become: true
+  become_user: root
+  template: src=k8s_kubelet.j2 dest=/etc/kubernetes/kubelet
+  notify:
+  - restart kubelet
+
 - name: enable and start kubelet
   become: true
   become_user: root

@@ -1,0 +1,14 @@
+# logging to stderr means we get it in the systemd journal
+KUBE_LOGTOSTDERR="--logtostderr=true"
+
+# journal message level, 0 is debug
+KUBE_LOG_LEVEL="--v=0"
+
+# Should this cluster be allowed to run privileged docker containers
+KUBE_ALLOW_PRIV="--allow_privileged=false"
+
+# How the replication controller and scheduler find the kube-apiserver
+{% set internal_master_ip=
+      hostvars[groups[k8s_master_group_name][0]].ansible_all_ipv4_addresses |
+      ipaddr(internal_net_cidr) | first -%}
+KUBE_MASTER="--master=http://{{ internal_master_ip }}:8080"
