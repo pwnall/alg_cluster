@@ -1,0 +1,29 @@
+# The address on the local server to listen to.
+KUBE_API_ADDRESS="--address=0.0.0.0"
+
+# The port on the local server to listen on.
+KUBE_API_PORT="--port=8080"
+
+# Port minions listen on
+# KUBELET_PORT="--kubelet_port=10250"
+
+# Address range to use for services
+KUBE_SERVICE_ADDRESSES="--portal_net={{ k8s_services_cidr }}"
+
+# default admission control policies
+KUBE_ADMISSION_CONTROL="--admission_control=NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ResourceQuota"
+
+# Comma seperated list of nodes in the etcd cluster
+KUBE_ETCD_SERVERS="--etcd_servers=
+{%- set join_comma = joiner(",") -%}
+{%- for etcd_server in groups[k8s_etcd_group_name] -%}
+http://
+{{- hostvars[etcd_server].ansible_all_ipv4_addresses |
+    ipaddr(internal_net_cidr) | first -}}
+:2379
+{{- join_comma() -}}
+{%- endfor -%}
+"
+
+# Add you own!
+KUBE_API_ARGS=""

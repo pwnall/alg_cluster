@@ -1,0 +1,10 @@
+---
+- name: restart flannel
+  become: true
+  become_user: root
+  service: name=flanneld state=restarted
+
+- name: restart docker daemon
+  become: true
+  become_user: root
+  service: name=docker state=restarted

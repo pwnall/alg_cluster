@@ -1,0 +1,43 @@
+---
+- name: create registry Docker container
+  become: true
+  become_user: root
+  docker:
+    name: local-registry
+    image: registry
+    state: present
+    ports: 5000:5000
+    volumes: "/var/lib/local-registry:/srv/registry"
+    env:
+      STANDALONE: false
+      MIRROR_SOURCE: https://registry-1.docker.io
+      MIRROR_SOURCE_INDEX: https://index.docker.io
+      STORAGE_PATH: /srv/registry
+
+- name: set SElinux permissions on registry data
+  become: true
+  become_user: root
+  file:
+    path: /var/lib/local-registry
+    state: directory
+    recurse: yes
+    setype: svirt_sandbox_file_t
+
+- name: create registry systemd unit
+  become: true
+  become_user: root
+  template:
+    src: local-registry.service.j2
+    dest: /etc/systemd/system/local-registry.service
+  register: systemd_unit
+
+- name: reload systemd configuration
+  command: systemctl daemon-reload
+  become: true
+  become_user: root
+  when: systemd_unit.changed == True
+
+- name: enable and start registry systemd unit
+  become: true
+  become_user: root
+  service: name=local-registry enabled=yes state=started

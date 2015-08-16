@@ -1,0 +1,47 @@
+---
+# The name of an OpenStack network that is connected to the Internet.
+os_public_net: inet
+# Added to the beginning of various OpenStack names.
+# This is used to distinguish this deployment's hosts from other OpenStack
+# resources in the same project.
+os_prefix: alg
+
+# The private OpenStack network connecting the cluster's nodes.
+internal_net_name: "{{ os_prefix }}-private"
+# NOTE: The CIDR must be a private IP block, otherwise the dynamic
+#       inventory code may set ansible_ssh_host to an intranet IP address.
+internal_net_cidr: "10.60.0.0/24"
+
+# The OpenStack flavor (VM type) for the Kubernetes master.
+# This is only used in the cluster bringup receipe.
+os_master_flavor: m1.2core
+# The OpenStack flavor (VM type) for the Kubernetes workers.
+# This is only used in the cluster bringup receipe.
+os_worker_flavor: m1.2core
+# Number of Kubernetes worker VMs that will be created.
+# This is only used in the cluster bringup receipe.
+worker_count: 2
+# The password for the root and atomic user on the image.
+# This can only be used to log in using the console. SSH password
+# authentication is disabled for security.
+# This is only used in the cluster bringup receipe.
+os_console_password: atomic
+
+# The SSH user name that can access the cloud image.
+# This only needs to change if the cloud image doesn't accept cloudinit data.
+os_image_user: atomic
+
+# The IP block used to assign addresses to Docker containers.
+flannel_cidr: "172.16.0.0/12"
+# The etcd key used to store the flannel network configuration.
+flannel_etcd_key: "{{ os_prefix }}/network"
+# The IP block used for Kubernetes services.
+# TODO: Figure out what this actually means.
+k8s_services_cidr: "10.254.0.0/16"
+
+# The inventory group containing the etcd servers.
+k8s_etcd_group_name: meta-system_role_{{ os_prefix }}_master
+# The inventory group containing the Kubernetes master.
+k8s_master_group_name: meta-system_role_{{ os_prefix }}_master
+# The inventory group containing the Kubernetes workers.
+k8s_worker_group_name: meta-system_role_{{ os_prefix }}_worker

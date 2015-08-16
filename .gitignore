@@ -1,0 +1,14 @@
+# Downloaded data.
+tmp/
+
+# OpenStack credentials.
+clouds.yaml
+
+# Vagrant data.
+.vagrant
+
+# Vim.
+*.sw*
+
+# OSX
+.DS_Store

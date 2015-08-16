@@ -1,0 +1,33 @@
+---
+# etcd entry for the flannel overlay network.
+# Heavily inspired from: http://www.projectatomic.io/docs/gettingstarted/
+
+- name: compute internal network IP
+  set_fact:
+    internal_net_ip: >
+        {{ ansible_all_ipv4_addresses | ipaddr(internal_net_cidr) | first }}
+
+- name: configure flannel network
+  command: >
+    curl -L -X PUT
+    http://{{ internal_net_ip }}:2379/v2/keys/{{ flannel_etcd_key }}/config
+    --data-urlencode 'value={
+    "Network": "{{ flannel_cidr }}",
+    "SubnetLen": 24,
+    "Backend": { "Type": "vxlan" }
+    }'
+  args:
+    # NOTE: We can't use the uri module because it requires the httplib2
+    #       library, which is not installed in Fedora Atomic. Our alternatives
+    #       are curl, or building a container. The latter seems too
+    #       heavyweight.
+    warn: no
+  become: false
+  register: flannel_config_result
+  failed_when: '"errorCode" in flannel_config_result.stdout'
+  # NOTE: The etc2 API does not return a prevNode when a key is written for the
+  #       first time.
+  changed_when: >
+    (flannel_config_result.stdout|from_json).node.value !=
+    ((flannel_config_result.stdout|from_json).prevNode
+      |default({'value': ''})).value

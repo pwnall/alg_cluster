@@ -1,0 +1,20 @@
+# Flanneld configuration options
+
+# etcd url location.  Point this to the server where etcd runs
+FLANNEL_ETCD="
+{%- set join_comma = joiner(",") -%}
+{%- for etcd_server in groups[k8s_etcd_group_name] -%}
+http://
+{{- hostvars[etcd_server].ansible_all_ipv4_addresses |
+    ipaddr(internal_net_cidr) | first -}}
+:2379
+{{- join_comma() -}}
+{%- endfor -%}
+"
+
+# etcd config key.  This is the configuration key that flannel queries
+# For address range assignment
+FLANNEL_ETCD_KEY="/{{ flannel_etcd_key }}"
+
+# Any additional options that you want to pass
+#FLANNEL_OPTIONS=""

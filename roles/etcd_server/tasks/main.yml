@@ -1,0 +1,19 @@
+---
+# etcd 1-host cluster.
+# Heavily inspired from: http://www.projectatomic.io/docs/gettingstarted/
+- name: compute internal network IP
+  set_fact:
+    internal_net_ip: >
+        {{ ansible_all_ipv4_addresses | ipaddr(internal_net_cidr) | first }}
+
+- name: write etcd config
+  become: true
+  become_user: root
+  template: src=etcd.conf.j2 dest=/etc/etcd/etcd.conf
+  notify:
+  - restart etcd server
+
+- name: enable and start etcd server
+  become: true
+  become_user: root
+  service: name=etcd enabled=yes state=started

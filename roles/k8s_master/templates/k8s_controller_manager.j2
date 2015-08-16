@@ -1,0 +1,12 @@
+# Comma separated list of minions
+KUBELET_ADDRESSES="--machines=
+{%- set join_comma = joiner(",") -%}
+{%- for worker in groups[k8s_worker_group_name] -%}
+{{- hostvars[worker].ansible_all_ipv4_addresses | ipaddr(internal_net_cidr) |
+    first -}}
+{{- join_comma() -}}
+{%- endfor -%}
+"
+
+# Add you own!
+KUBE_CONTROLLER_MANAGER_ARGS=""

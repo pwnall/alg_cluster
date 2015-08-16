@@ -1,0 +1,15 @@
+---
+# Docker set up to use a local registry.
+# Heavily inspired from: http://www.projectatomic.io/docs/gettingstarted/
+
+- name: write docker config
+  become: true
+  become_user: root
+  template: src=docker_config.j2 dest=/etc/sysconfig/docker
+  notify:
+  - restart docker daemon
+
+- name: enable and start docker daemon
+  become: true
+  become_user: root
+  service: name=docker enabled=yes state=started

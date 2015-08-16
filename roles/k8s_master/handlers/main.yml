@@ -1,0 +1,15 @@
+---
+- name: restart kubernetes API server
+  become: true
+  become_user: root
+  service: name=kube-apiserver state=restarted
+
+- name: restart kubernetes controller
+  become: true
+  become_user: root
+  service: name=kube-controller-manager state=restarted
+
+- name: restart kubernetes scheduler
+  become: true
+  become_user: root
+  service: name=kube-scheduler state=restarted
