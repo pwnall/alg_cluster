@@ -1,6 +1,9 @@
 # Downloaded data.
 tmp/
 
+# Generated keys.
+keys/
+
 # OpenStack credentials.
 clouds.yaml
 

@@ -3,7 +3,7 @@ clouds:
   test:
     auth:
       auth_url: https://nimbus.csail.mit.edu:5001/v2.0
-      username: costan
+      username: costan@csail.mit.edu
       password: mysekretpassword
       project_id: usersandbox_costan
-    region_name: RegionOne
+    region_name: CSAIL_Stata

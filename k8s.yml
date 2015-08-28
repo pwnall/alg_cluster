@@ -4,28 +4,30 @@
 #       workers. If we don't do this before the master configuration, we'll
 #       need something like http://stackoverflow.com/questions/30024664
 - hosts: all
+  vars_files:
+  - openstack_vars.yml
   vars:
     ansible_ssh_user: "{{ os_image_user }}"
   roles:
   - atomic
 
-#- hosts: "{{ k8s_etcd_group_name }}"
-#  vars_files:
-#  - openstack_vars.yml
-#  vars:
-#    ansible_ssh_user: "{{ os_image_user }}"
-#  roles:
-#  - etcd_server
-#  - flannel_etcd_config
-#
-#- hosts: "{{ k8s_master_group_name }}"
-#  vars_files:
-#  - openstack_vars.yml
-#  vars:
-#    ansible_ssh_user: "{{ os_image_user }}"
-#  roles:
-#  - docker_registry
-#  - k8s_master
+- hosts: "{{ k8s_etcd_group_name }}"
+  vars_files:
+  - openstack_vars.yml
+  vars:
+    ansible_ssh_user: "{{ os_image_user }}"
+  roles:
+  - etcd_server
+  - flannel_etcd_config
+
+- hosts: "{{ k8s_master_group_name }}"
+  vars_files:
+  - openstack_vars.yml
+  vars:
+    ansible_ssh_user: "{{ os_image_user }}"
+  roles:
+  - docker_registry
+  - k8s_master
 
 - hosts: "{{ k8s_worker_group_name }}"
   vars_files:

@@ -20,7 +20,7 @@ os_master_flavor: m1.2core
 os_worker_flavor: m1.2core
 # Number of Kubernetes worker VMs that will be created.
 # This is only used in the cluster bringup receipe.
-worker_count: 2
+worker_count: 3
 # The password for the root and atomic user on the image.
 # This can only be used to log in using the console. SSH password
 # authentication is disabled for security.

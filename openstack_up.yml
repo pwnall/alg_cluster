@@ -12,8 +12,35 @@
     security_group_name: "{{ os_prefix }} Cluster Security"
     master_instance_name: "{{ os_prefix }}-master"
     worker_instance_prefix: "{{ os_prefix }}-worker"
+    os_vm_bringup_timeout: 1800
 
   tasks:
+    - name: create keys directory
+      file: path=./keys state=directory mode=0755
+
+    - name: create SSH host key for master
+      command: >
+          ssh-keygen -N '' -t rsa -b 2048 -f ./keys/master
+          -C "master@{{ os_prefix}}"
+      args:
+        creates: ./keys/master
+
+    - name: create SSH host key for workers
+      command: >
+          ssh-keygen -N '' -t rsa -b 2048 -f ./keys/worker
+          -C "worker@{{ os_prefix}}"
+      args:
+        creates: ./keys/worker
+
+    - name: read SSH keys
+      set_fact:
+        master_private_key: >
+          {{ lookup('file', './keys/master') | regex_replace('\n', '\n    ') }}
+        master_public_key: "{{ lookup('file', './keys/master.pub') }}"
+        worker_private_key: >
+          {{ lookup('file', './keys/worker') | regex_replace('\n', '\n    ') }}
+        worker_public_key: "{{ lookup('file', './keys/worker.pub') }}"
+
     - name: create tmp directory
       file: path=./tmp state=directory mode=0755
 
@@ -41,7 +68,7 @@
         description: Allows SSH, HTTP(S) and secure Docker
         cloud: "{{ os_cloud }}"
 
-    - name: add ports to security group
+    - name: add public ports to security group
       os_security_group_rule:
         security_group: "{{ security_group_name }}"
         direction: ingress
@@ -51,6 +78,35 @@
         port_range_max: "{{ item }}"
         cloud: "{{ os_cloud }}"
       with_items: [22, 80, 443]
+
+    - name: add internal TCP ports to security group
+      os_security_group_rule:
+        security_group: "{{ security_group_name }}"
+        direction: ingress
+        protocol: tcp
+        remote_ip_prefix: "{{ internal_net_cidr }}"
+        port_range_min: "{{ item }}"
+        port_range_max: "{{ item }}"
+        cloud: "{{ os_cloud }}"
+      with_items: [
+        2379,  # etcd
+        8080,  # Kubernetes API server
+      ]
+
+    - name: add internal UDP ports to security group
+      os_security_group_rule:
+        security_group: "{{ security_group_name }}"
+        direction: ingress
+        protocol: udp
+        remote_ip_prefix: "{{ internal_net_cidr }}"
+        port_range_min: "{{ item }}"
+        port_range_max: "{{ item }}"
+        cloud: "{{ os_cloud }}"
+      with_items: [
+        8285,  # flannel over udp
+        8472,  # flannel over vxlan
+      ]
+
 
     - name: create internal network
       os_network:
@@ -84,7 +140,10 @@
         meta:
           system: "{{ os_prefix }}"
           system_role: "{{ os_prefix }}_master"
-        config_drive: no
+        # NOTE: Setting config_drive to no causes cloud-init to fail
+        #       occasionally, if it doesn't discover the correct route to
+        #       the metadata server (169.254.169.254).
+        config_drive: yes
         # For cloudinit configuration details, see the Atomic article below.
         # https://access.redhat.com/articles/rhel-atomic-cloud-init-faq
         # Static IP configuration trick from GitHub gist below.
@@ -101,6 +160,11 @@
           ssh_pwauth: False
           ssh_authorized_keys:
           - {{ public_key }}
+          ssh_keys:
+            rsa_private: |
+              {{ master_private_key }}
+            rsa_public: {{ master_public_key }}
+        timeout: "{{ os_vm_bringup_timeout }}"
         cloud: "{{ os_cloud }}"
       notify: refresh the dynamic inventory cache
 
@@ -117,7 +181,7 @@
         meta:
           system: "{{ os_prefix }}"
           system_role: "{{ os_prefix }}_worker"
-        config_drive: no
+        config_drive: yes
         userdata: |
           #cloud-config
           user: {{ os_image_user }}
@@ -130,9 +194,13 @@
           ssh_pwauth: False
           ssh_authorized_keys:
           - {{ public_key }}
+          ssh_keys:
+            rsa_private: |
+              {{ worker_private_key }}
+            rsa_public: {{ worker_public_key }}
+        timeout: "{{ os_vm_bringup_timeout }}"
         cloud: "{{ os_cloud }}"
       with_sequence: start=1 end={{ worker_count }}
-      when: false
       notify: refresh the dynamic inventory cache
 
   handlers:
