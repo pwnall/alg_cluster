@@ -1,0 +1,15 @@
+#cloud-config
+user: {{ os_image_user }}
+password: atomic
+chpasswd:
+  list: |
+    root:atomic
+    {{ os_image_user }}:atomic
+  expire: False
+ssh_pwauth: False
+ssh_authorized_keys:
+- {{ public_key }}
+ssh_keys:
+  rsa_private: |
+    {{ worker_private_key | regex_replace('\n', '\n    ') }}
+  rsa_public: {{ worker_public_key }}

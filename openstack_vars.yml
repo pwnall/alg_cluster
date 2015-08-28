@@ -21,6 +21,12 @@ os_worker_flavor: m1.2core
 # Number of Kubernetes worker VMs that will be created.
 # This is only used in the cluster bringup receipe.
 worker_count: 3
+# Size in GB for the volume attached to the Kubernetes master.
+# This volume stores the data in the Docker registry.
+os_master_volume_gb: 32
+# Size in GB for each of the volumes attached to Kubernetes workers.
+# These volumes store containers and data.
+os_worker_volume_gb: 32
 # The password for the root and atomic user on the image.
 # This can only be used to log in using the console. SSH password
 # authentication is disabled for security.

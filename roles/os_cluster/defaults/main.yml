@@ -1,0 +1,10 @@
+---
+public_key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+os_cloud: test
+atomic_image_url: https://download.fedoraproject.org/pub/fedora/linux/releases/22/Cloud/x86_64/Images/Fedora-Cloud-Atomic-22-20150521.x86_64.qcow2
+image_name: Fedora 22 Atomic
+key_name: "{{ os_prefix }} Cluster Key"
+security_group_name: "{{ os_prefix }} Cluster Security"
+master_instance_name: "{{ os_prefix }}-master"
+worker_instance_prefix: "{{ os_prefix }}-worker"
+os_vm_bringup_timeout: 1800

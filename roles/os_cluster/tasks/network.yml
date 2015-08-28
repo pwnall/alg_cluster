@@ -1,0 +1,66 @@
+---
+# Defines the networks connecting the VMs.
+
+- name: register security group
+  os_security_group:
+    name: "{{ security_group_name }}"
+    description: SSH + HTTP(S) from Internet, etcd + flannel from internal net
+    cloud: "{{ os_cloud }}"
+
+- name: add public ports to security group
+  os_security_group_rule:
+    security_group: "{{ security_group_name }}"
+    direction: ingress
+    protocol: tcp
+    remote_ip_prefix: 0.0.0.0/0
+    port_range_min: "{{ item }}"
+    port_range_max: "{{ item }}"
+    cloud: "{{ os_cloud }}"
+  with_items: [22, 80, 443]
+
+- name: add internal TCP ports to security group
+  os_security_group_rule:
+    security_group: "{{ security_group_name }}"
+    direction: ingress
+    protocol: tcp
+    remote_ip_prefix: "{{ internal_net_cidr }}"
+    port_range_min: "{{ item }}"
+    port_range_max: "{{ item }}"
+    cloud: "{{ os_cloud }}"
+  with_items: [
+    2379,  # etcd
+    8080,  # Kubernetes API server
+  ]
+
+- name: add internal UDP ports to security group
+  os_security_group_rule:
+    security_group: "{{ security_group_name }}"
+    direction: ingress
+    protocol: udp
+    remote_ip_prefix: "{{ internal_net_cidr }}"
+    port_range_min: "{{ item }}"
+    port_range_max: "{{ item }}"
+    cloud: "{{ os_cloud }}"
+  with_items: [
+    8285,  # flannel over udp
+    8472,  # flannel over vxlan
+  ]
+
+- name: create internal network
+  os_network:
+    name: "{{ internal_net_name }}"
+    admin_state_up: yes
+    shared: no
+    cloud: "{{ os_cloud }}"
+
+- name: add subnet to internal network
+  os_subnet:
+    name: "{{ internal_net_name }}-net"
+    network_name: "{{ internal_net_name }}"
+    cidr: "{{ internal_net_cidr }}"
+    enable_dhcp: yes
+    # HACK: The network should not have a gateway IP at all, but that is
+    #       not possible with the os_subnet module.
+    #       https://github.com/ansible/ansible-modules-core/issues/1880
+    #gateway_ip: "0.0.0.0"
+    cloud: "{{ os_cloud }}"
