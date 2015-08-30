@@ -13,7 +13,7 @@
   template: src=k8s_config.j2 dest=/etc/kubernetes/config
   notify:
   - restart kubernetes API server
-  - restart kubernetes controller
+  - restart kubernetes controller manager
   - restart kubernetes scheduler
 
 - name: write kubernetes API config
@@ -23,21 +23,21 @@
   notify:
   - restart kubernetes API server
 
-- name: write kubernetes controller config
+- name: write kubernetes controller manager config
   become: true
   become_user: root
   template:
     src: k8s_controller_manager.j2
     dest: /etc/kubernetes/controller-manager
   notify:
-  - restart kubernetes controller
+  - restart kubernetes controller manager
 
 - name: enable and start kubernetes API server
   become: true
   become_user: root
   service: name=kube-apiserver enabled=yes state=started
 
-- name: enable and start kubernetes controller
+- name: enable and start kubernetes controller manager
   become: true
   become_user: root
   service: name=kube-controller-manager enabled=yes state=started

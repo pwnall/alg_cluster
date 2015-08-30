@@ -50,3 +50,5 @@
     cloud: "{{ os_cloud }}"
   with_sequence: start=1 end={{ worker_count }}
   notify: refresh the dynamic inventory cache
+
+- include: volumes.yml

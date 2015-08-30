@@ -4,7 +4,8 @@ The following [Homebrew](http://brew.sh) commands install the requirements on
 OSX.
 
 ```bash
-brew install ansible brew-cask python
+brew install caskroom/cask/brew-cask
+brew install ansible --HEAD
 brew cask install vagrant
 vagrant plugin install vagrant-reload
 ```
@@ -23,7 +24,7 @@ credentials in it.
 Second, run the cluster bringup playbook.
 
 ```bash
-ansible-playbook -i "localhost," openstack_up.yml
+ansible-playbook -i "localhost," ansible/openstack_up.yml
 ```
 
 Due to
@@ -42,7 +43,7 @@ a manual configuration step is necessary after bringing up the cluster.
 Third, run the Kubernetes bringup playbook.
 
 ```bash
-ansible-playbook k8s.yml
+ansible-playbook ansible/k8s.yml
 ```
 
 Last, save the contents of the `keys/` directory somewhere safe.

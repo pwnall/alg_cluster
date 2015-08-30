@@ -8,7 +8,7 @@
 - name: wait for atomic server to come back up
   local_action: >
     wait_for host={{ ansible_ssh_host }} port={{ ansible_ssh_port }}
-    search_regex=OpenSSH delay=2
+    search_regex=OpenSSH delay=5
   become: false
 
 - name: reload facts after atomic upgrade

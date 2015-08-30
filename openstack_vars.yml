@@ -27,6 +27,8 @@ os_master_volume_gb: 32
 # Size in GB for each of the volumes attached to Kubernetes workers.
 # These volumes store containers and data.
 os_worker_volume_gb: 32
+# Type for all the volumes created for the Kubernetes cluster.
+os_volume_type: production
 # The password for the root and atomic user on the image.
 # This can only be used to log in using the console. SSH password
 # authentication is disabled for security.

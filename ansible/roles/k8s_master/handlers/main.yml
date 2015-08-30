@@ -4,7 +4,7 @@
   become_user: root
   service: name=kube-apiserver state=restarted
 
-- name: restart kubernetes controller
+- name: restart kubernetes controller manager
   become: true
   become_user: root
   service: name=kube-controller-manager state=restarted

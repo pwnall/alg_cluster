@@ -35,7 +35,7 @@ Vagrant.configure(2) do |config|
     # NOTE: The ansible provisioning block is only defined in the last worker,
     #       so it runs after all the VMs have been created.
     config.vm.provision :ansible do |ansible|
-      ansible.playbook = "k8s.yml"
+      ansible.playbook = "ansible/k8s.yml"
       ansible.limit = "all"
 
       # Simulate the groups produced by the OpenStack setup.

@@ -1,19 +1,24 @@
 ---
+# Ansible playbook that sets up Kubernetes on an OpenStack cluster.
+# The playbook can also be used on a cluster set up by the Vagrant file at the
+# root of this repository.
+
 # NOTE: This has the side-effect of kicking off fact gathering on the workers.
 #       The Kubernetes master configuration needs the internal IPs of all the
 #       workers. If we don't do this before the master configuration, we'll
 #       need something like http://stackoverflow.com/questions/30024664
 - hosts: all
   vars_files:
-  - openstack_vars.yml
+  - ../openstack_vars.yml
   vars:
     ansible_ssh_user: "{{ os_image_user }}"
   roles:
-  - atomic
+  - atomic_update
+  - docker_storage
 
 - hosts: "{{ k8s_etcd_group_name }}"
   vars_files:
-  - openstack_vars.yml
+  - ../openstack_vars.yml
   vars:
     ansible_ssh_user: "{{ os_image_user }}"
   roles:
@@ -22,7 +27,7 @@
 
 - hosts: "{{ k8s_master_group_name }}"
   vars_files:
-  - openstack_vars.yml
+  - ../openstack_vars.yml
   vars:
     ansible_ssh_user: "{{ os_image_user }}"
   roles:
@@ -31,7 +36,7 @@
 
 - hosts: "{{ k8s_worker_group_name }}"
   vars_files:
-  - openstack_vars.yml
+  - ../openstack_vars.yml
   vars:
     ansible_ssh_user: "{{ os_image_user }}"
   roles:

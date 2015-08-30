@@ -1,0 +1,15 @@
+---
+- name: update atomic
+  become: true
+  become_user: root
+  command: atomic host upgrade
+  register: atomic_update_result
+  changed_when: "'modified' in atomic_update_result.stdout"
+  notify:
+  - reboot atomic server
+  - wait for atomic server to come back up
+  - reload facts after atomic upgrade
+
+# NOTE: This makes sure that the machine reboots before it proceeds to the next
+#       play.
+- meta: flush_handlers
